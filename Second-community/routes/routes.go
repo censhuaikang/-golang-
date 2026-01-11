@@ -6,18 +6,13 @@ import (
 	"community/repositories"
 	"community/services"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-func SetupUserRoutes(r *gin.Engine) {
-	dsn := "root:censhuaikang@tcp(127.0.0.1:3306)/问答社区?charset=utf8&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
+func SetupUserRoutes(r *gin.Engine, db *gorm.DB) {
 	// 创建服务和控制器
-	userService := services.NewUserService(repositories.NewUserRepository(db))
+	userRepo := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepo, db)
 	userCtrl := controllers.NewUserController(userService)
 
 	// --- 公开路由 ---
@@ -30,7 +25,7 @@ func SetupUserRoutes(r *gin.Engine) {
 	{
 		auth.POST("/question/create", userCtrl.CreateQuestion)
 		auth.POST("/answer/create", userCtrl.CreateAnswer)
-		auth.POST("/answer/reply", userCtrl.Answer)
+		auth.POST("/answer/reply", userCtrl.CreateReply)
 		auth.POST("/modify/question", userCtrl.ModifyQuestion)
 		auth.POST("/modify/answer", userCtrl.ModifyAnswer)
 		auth.POST("/question/delete", userCtrl.DeleteQuestion)

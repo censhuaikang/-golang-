@@ -1,0 +1,204 @@
+{
+  "info": {
+    "_postman_id": "c7a8b9e0-1234-4567-89ab-cdef01234567",
+    "name": "Community System API",
+    "description": "模拟最强大脑生成的社区系统全功能测试集",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 用户模块",
+      "item": [
+        {
+          "name": "用户注册",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/user/register"
+          }
+        },
+        {
+          "name": "用户登录",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/user/login"
+          }
+        },
+        {
+          "name": "注销账号",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": "http://localhost:8080/user/delete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 问题模块",
+      "item": [
+        {
+          "name": "创建问题",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"如何评价 Go 语言？\",\n    \"content\": \"请大家从并发模型、开发效率等角度谈谈看法。\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/question/create"
+          }
+        },
+        {
+          "name": "修改问题",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ID\": 1,\n    \"title\": \"如何评价 Go 1.22 版本？\",\n    \"content\": \"最新的 for 循环语义变化很大，大家怎么看？\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/modify/question"
+          }
+        },
+        {
+          "name": "删除问题",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["question", "delete"],
+              "query": [
+                { "key": "id", "value": "1" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 回答与回复",
+      "item": [
+        {
+          "name": "创建回答",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"question_id\": 1,\n    \"content\": \"我觉得 Go 最大的优势就是简洁和高并发。\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/answer/create"
+          }
+        },
+        {
+          "name": "修改回答",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ID\": 1,\n    \"content\": \"补充一下，标准库也非常强大。\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/modify/answer"
+          }
+        },
+        {
+          "name": "回复回答",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"answer_id\": 1,\n    \"content\": \"完全同意你的看法！\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "http://localhost:8080/answer/reply"
+          }
+        },
+        {
+          "name": "删除回答",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["answer", "delete"],
+              "query": [
+                { "key": "id", "value": "1" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 社交功能",
+      "item": [
+        {
+          "name": "关注用户",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": "http://localhost:8080/follow/2"
+          }
+        },
+        {
+          "name": "取消关注",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": "http://localhost:8080/unfollow/2"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    }
+  ]
+}
