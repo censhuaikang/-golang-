@@ -72,137 +72,153 @@ go run main.go
 - `routes` - 路由包，定义应用的路由和控制器映射。
 - `services` - 服务包，封装业务逻辑。
 
-- ### 0. 准备工作
+- - ### 1. 用户模块 (User)
 
-  - **Base URL**: `http://127.0.0.1:8080`
-  - **权限机制**:
-    - 登录接口会返回一个 `token`。
-    - 所有“受保护路由”均需在 Postman 的 **Headers** 中添加：
-      - Key: `Authorization`
-      - Value: `Bearer <你的TOKEN>`
-  - **数据格式**: Body 选择 `raw` -> `JSON`。
+    该模块用于管理用户身份。**登录后获取的 Token 是访问后续所有接口的凭证**。
   
-  ------
+    - **用户注册**
   
-  ### 1. 用户模块 (User)
+      - **URL**: `POST http://localhost:8080/user/register`
   
-  #### 1.1 用户注册
+      - **Body**:
   
-  - **接口**: `POST /user/register`
-  - **功能**: 注册新账号。
-  - **Body**:
+        JSON
   
-  JSON
+        ```
+        {
+            "username": "岑曦",
+            "password": "123456"
+        }
+        ```
   
-  ```
-  {
-      "username": "testuser",
-      "password": "mysecretpassword"
-  }
-  ```
+    - **用户登录**
   
-  #### 1.2 用户登录
+      - **URL**: `POST http://localhost:8080/user/login`
   
-  - **接口**: `POST /user/login`
-  - **功能**: 验证身份并获取 Token。
-  - **Body**: 同上。
-  - **提示**: 复制返回结果中的 `token` 字段，用于后续接口。
+      - **Body**:
   
-  #### 1.3 注销账号 (需登录)
+        JSON
   
-  - **接口**: `POST /user/delete`
-  - **功能**: 永久删除当前登录的账号。
-  - **Header**: `Authorization: Bearer <TOKEN>`
+        ```
+        {
+            "username": "岑曦",
+            "password": "123456"
+        }
+        ```
   
-  ------
+      - **注意**: 登录成功后，请复制返回结果中的 `token` 字段。
   
-  ### 2. 问题模块 (Question)
+    - **注销账号**
   
-  #### 2.1 发布问题 (需登录)
+      - **URL**: `POST http://localhost:8080/user/delete`
+      - **Header**: `Authorization: Bearer {{token}}`
   
-  - **接口**: `POST /question/create`
-  - **Body**:
+    ------
   
-  JSON
+    ### 2. 问题模块 (Question)
   
-  ```
-  {
-      "title": "如何学习 Golang?",
-      "content": "求推荐一些好的学习路径和项目。"
-  }
-  ```
+    管理社区内的提问。修改和删除操作必须由问题的作者执行。
   
-  #### 2.2 修改问题 (需登录 & 仅限作者)
+    - **创建问题**
   
-  - **接口**: `POST /modify/question`
-  - **说明**: 代码中会严格校验 `userID` 是否为该问题原作者。
-  - **Body**:
+      - **URL**: `POST http://localhost:8080/question/create`
   
-  JSON
+      - **Body**:
   
-  ```
-  {
-      "id": 1, 
-      "title": "如何学习 Golang (更新版)",
-      "content": "我想找关于 Gin 框架的教程。"
-  }
-  ```
+        JSON
   
-  #### 2.3 删除问题 (需登录 & 仅限作者)
+        ```
+        {
+            "title": "如何评价 Go 语言？",
+            "content": "请大家从并发模型、开发效率等角度谈谈看法。"
+        }
+        ```
   
-  - **接口**: `POST /question/delete?id=1`
-  - **方法**: `POST` (注意：代码中使用 `c.Query("id")` 获取参数)
-  - **参数**: 在 URL 后拼接 `?id=问题ID`。
+    - **修改问题**
   
-  ------
+      - **URL**: `POST http://localhost:8080/modify/question`
   
-  ### 3. 回答与评论模块 (Answer)
+      - **Body**: (需带上问题的 `ID`)
   
-  #### 3.1 提交回答 (需登录)
+        JSON
   
-  - **接口**: `POST /answer/create`
-  - **Body**:
+        ```
+        {
+            "ID": 1,
+            "title": "如何评价 Go 1.22 版本？",
+            "content": "最新的 for 循环语义变化很大，大家怎么看？"
+        }
+        ```
   
-  JSON
+    - **删除问题**
   
-  ```
-  {
-      "question_id": 1,
-      "content": "多写代码，多看标准库源码。"
-  }
-  ```
+      - **URL**: `POST http://localhost:8080/question/delete?id=1`
+      - **说明**: 通过 URL 参数 `id` 指定要删除的问题编号。
   
-  #### 3.2 回复他人的回答 (需登录)
+    ------
   
-  - **接口**: `POST /answer/reply`
-  - **功能**: 针对某个现有的回答进行追问或回复。
-  - **Body**:
+    ### 3. 回答与回复模块 (Answer & Reply)
   
-  JSON
+    针对问题进行回答，或对他人的回答进行评论。
   
-  ```
-  {
-      "answer_id": 1,
-      "content": "握手，我也是这么想的。"
-  }
-  ```
+    - **创建回答**
   
-  #### 3.3 修改/删除回答 (需登录 & 仅限作者)
+      - **URL**: `POST http://localhost:8080/answer/create`
   
-  - **修改**: `POST /modify/answer` (Body 需带回答 `id`)
-  - **删除**: `POST /answer/delete?id=1` (Query 参数拼接)
+      - **Body**:
   
-  ------
+        JSON
   
-  ### 4. 社交功能 (Social)
+        ```
+        {
+            "question_id": 1,
+            "content": "我觉得 Go 最大的优势就是简洁和高并发。"
+        }
+        ```
   
-  #### 4.1 关注用户 (需登录)
+    - **修改回答**
   
-  - **接口**: `POST /follow/:id`
-  - **示例**: `POST http://127.0.0.1:8080/follow/5` (关注 ID 为 5 的用户)
-  - **注意**: 不能关注自己，否则会报错。
+      - **URL**: `POST http://localhost:8080/modify/answer`
   
-  #### 4.2 取消关注 (需登录)
+      - **Body**:
   
-  - **接口**: `POST /unfollow/:id`
-  - **示例**: `POST http://127.0.0.1:8080/unfollow/5`
+        JSON
+  
+        ```
+        {
+            "ID": 1,
+            "content": "补充一下，标准库也非常强大。"
+        }
+        ```
+  
+    - **回复回答 (评论)**
+  
+      - **URL**: `POST http://localhost:8080/answer/reply`
+  
+      - **Body**:
+  
+        JSON
+  
+        ```
+        {
+            "answer_id": 1,
+            "content": "完全同意你的看法！"
+        }
+        ```
+  
+    - **删除回答**
+  
+      - **URL**: `POST http://localhost:8080/answer/delete?id=1`
+  
+    ------
+  
+    ### 4. 社交模块 (Social)
+  
+    用户之间的关注与取消关注功能。
+  
+    - **关注用户**
+      - **URL**: `POST http://localhost:8080/follow/2`
+      - **说明**: 最后的 `/2` 代表你要关注的用户 ID。
+    - **取消关注**
+      - **URL**: `POST http://localhost:8080/unfollow/2`
+      - **说明**: 撤销对 ID 为 2 的用户的关注。
